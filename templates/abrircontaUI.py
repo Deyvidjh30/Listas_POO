@@ -1,10 +1,9 @@
 import streamlit as st
-from view import View
+from views import View
 import time
 
-
 class AbrirContaUI:
-    @staticmethod
+
     def main():
         st.header("Abrir Conta no Sistema")
 
@@ -15,6 +14,6 @@ class AbrirContaUI:
 
         if st.button("Inserir"):
             View.cliente_inserir(nome, email, fone, senha)
-            st.success("Conta criada com sucesso")
-            time.sleep(1)
+            st.success("Conta criada com sucesso!")
+            time.sleep(2)
             st.rerun()

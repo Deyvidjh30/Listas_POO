@@ -1,66 +1,43 @@
 import json
 
-
 class Cliente:
     def __init__(self, id, nome, email, fone, senha):
-        self.__id = id
-        self.__nome = nome
-        self.__email = email
-        self.__fone = fone
-        self.__senha = senha
+        self.set_id(id)
+        self.set_nome(nome)
+        self.set_email(email)
+        self.set_fone(fone)
+        self.set_senha(senha)
 
-    def get_id(self):
-        return self.__id
+    # Gets
+    def get_id(self): return self.id
+    def get_nome(self): return self.nome
+    def get_email(self): return self.email
+    def get_fone(self): return self.fone
+    def get_senha(self): return self.senha
 
-    def get_nome(self):
-        return self.__nome
-
-    def get_email(self):
-        return self.__email
-
-    def get_fone(self):
-        return self.__fone
-
-    def get_senha(self):
-        return self.__senha
-
-    def set_id(self, id):
-        self.__id = id
-
-    def set_nome(self, nome):
-        self.__nome = nome
-
-    def set_email(self, email):
-        self.__email = email
-
-    def set_fone(self, fone):
-        self.__fone = fone
-
-    def set_senha(self, senha):
-        self.__senha = senha
+    # Sets
+    def set_id(self, id): self.id = id
+    def set_nome(self, nome): self.nome = nome
+    def set_email(self, email): self.email = email
+    def set_fone(self, fone): self.fone = fone
+    def set_senha(self, senha): self.senha = senha
 
     def to_json(self):
-        return {
-            "id": self.__id,
-            "nome": self.__nome,
-            "email": self.__email,
-            "fone": self.__fone,
-            "senha": self.__senha
+        dic = {
+            "id": self.id,
+            "nome": self.nome,
+            "email": self.email,
+            "fone": self.fone,
+            "senha": self.senha
         }
-
+        return dic
 
     @staticmethod
     def from_json(dic):
-        return Cliente(
-            dic.get("id", 0),
-            dic.get("nome", ""),
-            dic.get("email", ""),
-            dic.get("fone", ""),
-            dic.get("senha", "")
-        )
+        return Cliente(dic["id"], dic["nome"], dic["email"], dic["fone"], dic["senha"])
 
     def __str__(self):
-        return f"{self.__id} - {self.__nome}"
+        return f"{self.id} - {self.nome} - {self.email} - {self.fone}"
 
 
 class ClienteDAO:
@@ -69,11 +46,11 @@ class ClienteDAO:
     @classmethod
     def inserir(cls, obj):
         cls.abrir()
-        _id = 0
+        id = 0
         for aux in cls.objetos:
-            if aux.get_id() > _id:
-                _id = aux.get_id()
-        obj.set_id(_id + 1)
+            if aux.get_id() > id:
+                id = aux.get_id()
+        obj.set_id(id + 1)
         cls.objetos.append(obj)
         cls.salvar()
 
@@ -109,19 +86,15 @@ class ClienteDAO:
     def abrir(cls):
         cls.objetos = []
         try:
-            with open("clientes.json", mode="r", encoding="utf-8") as arquivo:
-                lista = json.load(arquivo)
-                for dic in lista:
-                    cls.objetos.append(Cliente.from_json(dic))
+            with open("clientes.json", mode="r") as arquivo:
+                list_dic = json.load(arquivo)
+                for dic in list_dic:
+                    obj = Cliente.from_json(dic)
+                    cls.objetos.append(obj)
         except FileNotFoundError:
             pass
 
     @classmethod
     def salvar(cls):
-        with open("clientes.json", mode="w", encoding="utf-8") as arquivo:
-            json.dump(
-                [c.to_json() for c in cls.objetos],
-                arquivo,
-                ensure_ascii=False,
-                indent=4
-            )
+        with open("clientes.json", mode="w") as arquivo:
+            json.dump(cls.objetos, arquivo, default=Cliente.to_json)

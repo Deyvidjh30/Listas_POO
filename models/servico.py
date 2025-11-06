@@ -2,27 +2,35 @@ import json
 
 class Servico:
     def __init__(self, id, descricao, valor):
-        self.__id = id
-        self.__descricao = descricao
-        self.__valor = valor
+        self.set_id(id)
+        self.set_descricao(descricao)
+        self.set_valor(valor)
 
-    def get_id(self): return self.__id
-    def get_descricao(self): return self.__descricao
-    def get_valor(self): return self.__valor
+    # Gets
+    def get_id(self): return self.id
+    def get_descricao(self): return self.descricao
+    def get_valor(self): return self.valor
 
-    def set_id(self, id): self.__id = id
-    def set_descricao(self, descricao): self.__descricao = descricao
-    def set_valor(self, valor): self.__valor = valor
+    # Sets
+    def set_id(self, id): self.id = id
+    def set_descricao(self, descricao): self.descricao = descricao
+    def set_valor(self, valor): self.valor = valor
 
     def to_json(self):
-        return {"id": self.__id, "descricao": self.__descricao, "valor": self.__valor}
+        dic = {
+            "id": self.id,
+            "descricao": self.descricao,
+            "valor": self.valor
+        }
+        return dic
 
     @staticmethod
     def from_json(dic):
-        return Servico(dic.get("id", 0), dic.get("descricao", ""), dic.get("valor", 0))
+        return Servico(dic["id"], dic["descricao"], dic["valor"])
 
     def __str__(self):
-        return f"{self.__id} - {self.__descricao}"
+        return f"{self.id} - {self.descricao} - R$ {self.valor:.2f}"
+
 
 class ServicoDAO:
     objetos = []
@@ -30,11 +38,11 @@ class ServicoDAO:
     @classmethod
     def inserir(cls, obj):
         cls.abrir()
-        _id = 0
+        id = 0
         for aux in cls.objetos:
-            if aux.get_id() > _id:
-                _id = aux.get_id()
-        obj.set_id(_id + 1)
+            if aux.get_id() > id:
+                id = aux.get_id()
+        obj.set_id(id + 1)
         cls.objetos.append(obj)
         cls.salvar()
 
@@ -70,14 +78,15 @@ class ServicoDAO:
     def abrir(cls):
         cls.objetos = []
         try:
-            with open("servico.json", mode="r", encoding="utf-8") as arquivo:
-                lista = json.load(arquivo)
-                for dic in lista:
-                    cls.objetos.append(Servico.from_json(dic))
+            with open("servicos.json", mode="r") as arquivo:
+                list_dic = json.load(arquivo)
+                for dic in list_dic:
+                    obj = Servico.from_json(dic)
+                    cls.objetos.append(obj)
         except FileNotFoundError:
             pass
 
     @classmethod
     def salvar(cls):
-        with open("servico.json", mode="w", encoding="utf-8") as arquivo:
-            json.dump([s.to_json() for s in cls.objetos], arquivo, ensure_ascii=False, indent=4)
+        with open("servicos.json", mode="w") as arquivo:
+            json.dump(cls.objetos, arquivo, default=Servico.to_json)

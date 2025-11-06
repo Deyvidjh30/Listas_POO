@@ -1,10 +1,1 @@
-[
-    {
-        "id": 1,
-        "nome": "Emilli",
-        "email": "emilli@gmail.com",
-        "especialidade": "professora",
-        "conselho": "...",
-        "senha": "1234"
-    }
-]
+[{"id": 2, "nome": "dani", "especialidade": "cabelereira", "conselho": "cabelereira", "email": "dani@gmail.com", "senha": "1234"}, {"id": 3, "nome": "davi", "especialidade": "lavador de carro", "conselho": "lavador de carro", "email": "davi@gmail.com", "senha": "1234"}, {"id": 1, "nome": "gilbert", "especialidade": "organizador", "conselho": "organizador", "email": "gilbert@gmail.com", "senha": "1234"}]
