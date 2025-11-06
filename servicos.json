@@ -1,1 +1,14 @@
-[{"id": 1, "descricao": "lavar o carro", "valor": 100.0}, {"id": 2, "descricao": "Cortar o cabelo", "valor": 30.0}, {"id": 3, "descricao": "Alugar kit de festas", "valor": 300.0}]
+[
+  {
+    "tipo": "hora",
+    "id": 1,
+    "descricao": "kit festa",
+    "valor_hora": 100.0
+  },
+  {
+    "tipo": "fixo",
+    "id": 2,
+    "descricao": "corte de cabelo",
+    "valor": 30.0
+  }
+]

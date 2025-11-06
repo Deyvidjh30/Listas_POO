@@ -1,3 +1,4 @@
+# models/servico.py
 import json
 
 class Servico:
@@ -6,43 +7,71 @@ class Servico:
         self.set_descricao(descricao)
         self.set_valor(valor)
 
-    # Gets
+    # Gets/sets
     def get_id(self): return self.id
     def get_descricao(self): return self.descricao
     def get_valor(self): return self.valor
-
-    # Sets
     def set_id(self, id): self.id = id
     def set_descricao(self, descricao): self.descricao = descricao
     def set_valor(self, valor): self.valor = valor
 
+    # Preço padrão (serviço fixo)
+    def calcular_preco(self, horas=1):
+        return self.valor
+
     def to_json(self):
-        dic = {
+        return {
+            "tipo": "fixo",
             "id": self.id,
             "descricao": self.descricao,
             "valor": self.valor
         }
-        return dic
 
     @staticmethod
     def from_json(dic):
-        return Servico(dic["id"], dic["descricao"], dic["valor"])
+        tipo = dic.get("tipo", "fixo")
+        if tipo == "hora":
+            return ServicoPorHora(dic["id"], dic["descricao"], dic["valor_hora"])
+        else:
+            return Servico(dic["id"], dic["descricao"], dic["valor"])
 
     def __str__(self):
         return f"{self.id} - {self.descricao} - R$ {self.valor:.2f}"
 
 
+class ServicoPorHora(Servico):
+    def __init__(self, id, descricao, valor_hora):
+        # Reuse valor para representar valor por hora
+        super().__init__(id, descricao, valor_hora)
+
+    # horas é número de horas contratadas
+    def calcular_preco(self, horas=1):
+        return self.valor * max(1, int(horas))
+
+    def to_json(self):
+        return {
+            "tipo": "hora",
+            "id": self.id,
+            "descricao": self.descricao,
+            "valor_hora": self.valor
+        }
+
+    def __str__(self):
+        return f"{self.id} - {self.descricao} - R$ {self.valor:.2f}/hora"
+
+
 class ServicoDAO:
     objetos = []
+    arquivo = "servicos.json"
 
     @classmethod
     def inserir(cls, obj):
         cls.abrir()
-        id = 0
+        id_max = 0
         for aux in cls.objetos:
-            if aux.get_id() > id:
-                id = aux.get_id()
-        obj.set_id(id + 1)
+            if aux.get_id() > id_max:
+                id_max = aux.get_id()
+        obj.set_id(id_max + 1)
         cls.objetos.append(obj)
         cls.salvar()
 
@@ -78,15 +107,14 @@ class ServicoDAO:
     def abrir(cls):
         cls.objetos = []
         try:
-            with open("servicos.json", mode="r") as arquivo:
-                list_dic = json.load(arquivo)
+            with open(cls.arquivo, mode="r", encoding="utf-8") as f:
+                list_dic = json.load(f)
                 for dic in list_dic:
-                    obj = Servico.from_json(dic)
-                    cls.objetos.append(obj)
+                    cls.objetos.append(Servico.from_json(dic))
         except FileNotFoundError:
             pass
 
     @classmethod
     def salvar(cls):
-        with open("servicos.json", mode="w") as arquivo:
-            json.dump(cls.objetos, arquivo, default=Servico.to_json)
+        with open(cls.arquivo, mode="w", encoding="utf-8") as f:
+            json.dump([o.to_json() for o in cls.objetos], f, ensure_ascii=False, indent=2)

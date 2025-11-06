@@ -1,3 +1,4 @@
+# templates/visualizarServicoUI.py
 import streamlit as st
 import pandas as pd
 from views import View
@@ -26,12 +27,23 @@ class VisualizarServicoUI:
         for obj in horarios_cliente:
             servico = View.servico_listar_id(obj.get_id_servico())
             profissional = View.profissional_listar_id(obj.get_id_profissional())
+            dur = obj.get_duracao_horas()
+            # se servico for do tipo hora, calcular total
+            total = None
+            tipo = servico.to_json().get("tipo", "fixo") if servico else "fixo"
+            if servico:
+                if tipo == "hora":
+                    total = servico.calcular_preco(dur)
+                else:
+                    total = servico.calcular_preco()
             dic.append({
                 "id": obj.get_id(),
                 "data": obj.get_data(),
                 "confirmado": obj.get_confirmado(),
                 "serviço": servico.get_descricao() if servico else None,
-                "profissional": profissional.get_nome() if profissional else None
+                "profissional": profissional.get_nome() if profissional else None,
+                "duracao_horas": dur,
+                "valor_total": f"R$ {total:.2f}" if total is not None else None
             })
 
         df = pd.DataFrame(dic)

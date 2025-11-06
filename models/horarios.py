@@ -1,3 +1,4 @@
+# models/horarios.py
 from datetime import datetime
 import json
 
@@ -9,60 +10,69 @@ class Horario:
         self.set_id_cliente(0)
         self.set_id_servico(0)
         self.set_id_profissional(0)
+        self.set_duracao_horas(1)  # novo campo: duração em horas (inteiro >=1)
 
-    # Representação textual
+    # Representação
     def __str__(self):
-        return f"{self.id} - {self.data.strftime('%d/%m/%Y %H:%M')} - {self.confirmado}"
+        data_str = self.data.strftime("%d/%m/%Y %H:%M") if self.data else "N/A"
+        return f"{self.id} - {data_str} - {self.confirmado} - {self.duracao_horas}h"
 
-    # Gets
+    # gets
     def get_id(self): return self.id
     def get_data(self): return self.data
     def get_confirmado(self): return self.confirmado
     def get_id_cliente(self): return self.id_cliente
     def get_id_servico(self): return self.id_servico
     def get_id_profissional(self): return self.id_profissional
+    def get_duracao_horas(self): return self.duracao_horas
 
-    # Sets
+    # sets
     def set_id(self, id): self.id = id
     def set_data(self, data): self.data = data
     def set_confirmado(self, confirmado): self.confirmado = confirmado
     def set_id_cliente(self, id_cliente): self.id_cliente = id_cliente
     def set_id_servico(self, id_servico): self.id_servico = id_servico
     def set_id_profissional(self, id_profissional): self.id_profissional = id_profissional
+    def set_duracao_horas(self, dur): self.duracao_horas = max(1, int(dur))
 
-    # Conversão para JSON
+    # JSON
     def to_json(self):
-        dic = {
+        return {
             "id": self.id,
-            "data": self.data.strftime("%d/%m/%Y %H:%M"),
+            "data": self.data.strftime("%d/%m/%Y %H:%M") if self.data else None,
             "confirmado": self.confirmado,
             "id_cliente": self.id_cliente,
             "id_servico": self.id_servico,
-            "id_profissional": self.id_profissional
+            "id_profissional": self.id_profissional,
+            "duracao_horas": self.duracao_horas
         }
-        return dic
 
     @staticmethod
     def from_json(dic):
-        horario = Horario(dic["id"], datetime.strptime(dic["data"], "%d/%m/%Y %H:%M"))
-        horario.set_confirmado(dic["confirmado"])
-        horario.set_id_cliente(dic["id_cliente"])
-        horario.set_id_servico(dic["id_servico"])
-        horario.set_id_profissional(dic["id_profissional"])
-        return horario
+        data = None
+        if dic.get("data"):
+            data = datetime.strptime(dic["data"], "%d/%m/%Y %H:%M")
+        h = Horario(dic["id"], data)
+        h.set_confirmado(dic.get("confirmado", False))
+        h.set_id_cliente(dic.get("id_cliente", 0))
+        h.set_id_servico(dic.get("id_servico", 0))
+        h.set_id_profissional(dic.get("id_profissional", 0))
+        h.set_duracao_horas(dic.get("duracao_horas", 1))
+        return h
 
 
 class HorarioDAO:
     objetos = []
+    arquivo = "horarios.json"
 
     @classmethod
     def inserir(cls, obj):
         cls.abrir()
-        id = 0
+        id_max = 0
         for aux in cls.objetos:
-            if aux.get_id() > id:
-                id = aux.get_id()
-        obj.set_id(id + 1)
+            if aux.get_id() > id_max:
+                id_max = aux.get_id()
+        obj.set_id(id_max + 1)
         cls.objetos.append(obj)
         cls.salvar()
 
@@ -98,15 +108,14 @@ class HorarioDAO:
     def abrir(cls):
         cls.objetos = []
         try:
-            with open("horarios.json", mode="r") as arquivo:
-                list_dic = json.load(arquivo)
+            with open(cls.arquivo, mode="r", encoding="utf-8") as f:
+                list_dic = json.load(f)
                 for dic in list_dic:
-                    obj = Horario.from_json(dic)
-                    cls.objetos.append(obj)
+                    cls.objetos.append(Horario.from_json(dic))
         except FileNotFoundError:
             pass
 
     @classmethod
     def salvar(cls):
-        with open("horarios.json", mode="w") as arquivo:
-            json.dump(cls.objetos, arquivo, default=Horario.to_json)
+        with open(cls.arquivo, mode="w", encoding="utf-8") as f:
+            json.dump([o.to_json() for o in cls.objetos], f, ensure_ascii=False, indent=2)

@@ -1,1 +1,20 @@
-[{"id": 2, "data": "05/11/2025 15:00", "confirmado": true, "id_cliente": 2, "id_servico": 2, "id_profissional": 2}, {"id": 3, "data": "05/11/2025 17:00", "confirmado": true, "id_cliente": 2, "id_servico": 1, "id_profissional": 3}, {"id": 1, "data": "05/11/2025 11:00", "confirmado": true, "id_cliente": 2, "id_servico": 3, "id_profissional": 1}]
+[
+  {
+    "id": 1,
+    "data": "05/11/2025 12:00",
+    "confirmado": true,
+    "id_cliente": 2,
+    "id_servico": 2,
+    "id_profissional": 2,
+    "duracao_horas": 1
+  },
+  {
+    "id": 2,
+    "data": "05/11/2025 16:00",
+    "confirmado": true,
+    "id_cliente": 2,
+    "id_servico": 1,
+    "id_profissional": 1,
+    "duracao_horas": 2
+  }
+]
